@@ -1,47 +1,50 @@
 //jqglqngl
 pipeline {
-agent {
-label {
-		label "built-in-project"
-		customWorkspace "/data/project-myapp"
-		
-		}
-		}
-		
-	stages {
-		
-		stage ('CLEAN_OLD_M2') {
-			
-			steps {
-				sh "rm -rf /home/saccount/.m2/repository"
-				
-			}
-			
-		}
-	
-		stage ('MAVEN_BUILD') {
-		
-			steps {
-						
-						sh "mvn clean package"
-			
-			}
-			
-		
-		}
-		
-		stage ('COPY_WAR_TO_Server'){
-		
-				steps {
-						
-						sh "scp -r target/LoginWebApp.war saccount@10.0.2.51:/data/project/wars"
+    agent any
 
-						}
-				
-				}
-	
-	
-	
-	}
-		
+    tools {
+        maven "apache-maven-3.9.11"
+    }
+
+    stages {
+
+        stage ('maven') {
+            steps {
+                dir('/mnt/project') {
+                    sh "mvn clean package"
+                }
+            }
+        }
+
+        stage ('extract war file') {
+            steps {
+                sh """
+                cd /mnt/
+                rm -rf test || true
+                mkdir test
+                cd test/
+
+                cp -r /mnt/project/target/LoginWebApp.war .
+                unzip LoginWebApp.war
+                rm -rf LoginWebApp.war
+                """
+            }
+        }
+
+        stage ('edit userregistration file') {
+            steps {
+                dir ('/mnt/test/') {
+                    sh """
+                    sed -i 's|localhost|database-1.cl2ge2kg8jsb.ap-south-1.rds.amazonaws.com|g' userRegistration.jsp
+		    sed -i 's|"root", "root"|"admin", "ratan1234"|g' userRegistration.jsp
+                
+                    zip -r LoginWebApp.war *
+                    cp LoginWebApp.war /mnt/servers/apache-tomcat-10.1.49/webapps/
+                    """
+                }
+            }
+        }
+
+    }
+
 }
