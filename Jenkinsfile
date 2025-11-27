@@ -27,7 +27,7 @@ pipeline {
                 mkdir test
                 cd test/
 
-                cp -r LoginWebApp.war .
+                cp -r /root/.jenkins/workspace/RDS/target/LoginWebApp.war .
                 unzip LoginWebApp.war
                 rm -rf LoginWebApp.war
                 """
