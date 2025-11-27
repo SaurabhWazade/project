@@ -27,7 +27,7 @@ pipeline {
                 mkdir test
                 cd test/
 
-                cp -r ~/project/target/LoginWebApp.war .
+                cp -r LoginWebApp.war .
                 unzip LoginWebApp.war
                 rm -rf LoginWebApp.war
                 """
