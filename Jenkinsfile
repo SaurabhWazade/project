@@ -7,14 +7,18 @@ pipeline {
     }
 
     stages {
+		stage ('clean-repo') {
+			steps {
+				sh """ rm -rf ~/.jenkins/workspace/* || true
+				rm -rf /mnt/servers/apache-tomcat-10.1.49/webapps/LoginWebApp* || true """
+			}
+		}
 
         stage ('maven') {
             steps {
-                dir('/mnt/project') {
                     sh "mvn clean package"
                 }
             }
-        }
 
         stage ('extract war file') {
             steps {
@@ -24,7 +28,7 @@ pipeline {
                 mkdir test
                 cd test/
 
-                cp -r /mnt/project/target/LoginWebApp.war .
+                cp -r ~/project/target/LoginWebApp.war .
                 unzip LoginWebApp.war
                 rm -rf LoginWebApp.war
                 """
