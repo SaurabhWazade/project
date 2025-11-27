@@ -7,52 +7,49 @@ pipeline {
     }
 
     stages {
-		stage ('clean-repo') {
-			steps {
-				sh " rm -rf /mnt/servers/apache-tomcat-10.1.49/webapps/LoginWebApp* || true "
-			}
-		}
 
-        stage ('maven') {
+        stage ('maven package') {
             steps {
-                    sh "mvn clean package"
-                }
+                sh "mvn clean package"
             }
+        }
 
-        stage ('extract war file') {
+        stage ('extract war + modify') {
             steps {
                 sh """
-                cd /mnt/
-                rm -rf test || true
-                mkdir test
-                cd test/
+                    cd /mnt/
+                    rm -rf test || true
+                    mkdir test
+                    cd test
+                    cp -r /root/.jenkins/workspace/RDS/target/LoginWebApp.war .
+                    unzip LoginWebApp.war
+                    rm -rf LoginWebApp.war
 
-                cp -r /root/.jenkins/workspace/RDS/target/LoginWebApp.war .
-                unzip LoginWebApp.war
-                rm -rf LoginWebApp.war
+                    sed -i 's|localhost|database-1.cl2ge2kg8jsb.ap-south-1.rds.amazonaws.com|g' userRegistration.jsp
+                    sed -i 's|"root", "root"|"admin", "ratan123"|g' userRegistration.jsp
+
+                    
+                    zip -r LoginWebApp.war *
+                    cp LoginWebApp.war /var/lib/docker/volumes/V1/_data/
                 """
             }
         }
 
-        stage ('edit userregistration file') {
+        stage ('docker compose up') {
             steps {
-                dir ('/mnt/test/') {
-                    sh """
-                    sed -i 's|localhost|database-1.cl2ge2kg8jsb.ap-south-1.rds.amazonaws.com|g' userRegistration.jsp
-		    sed -i 's|"root", "root"|"admin", "ratan123"|g' userRegistration.jsp
-                
-                    zip -r LoginWebApp.war *
-                    cp LoginWebApp.war /mnt/servers/apache-tomcat-10.1.49/webapps/
-                    """
-                }
+                sh """
+                    cd /mnt/project/
+                    docker compose down || true
+                    docker compose up -d
+                """
             }
         }
 
     }
-	post {
-		always {
-			sh " rm -rf ${WORKSPACE}/*"
-		}
-	}
 
+    post {
+        always {
+            sh "rm -rf ${WORKSPACE}/*"
+        }
+    }
 }
