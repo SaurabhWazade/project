@@ -9,8 +9,7 @@ pipeline {
     stages {
 		stage ('clean-repo') {
 			steps {
-				sh """ rm -rf ~/.jenkins/workspace/* || true
-				rm -rf /mnt/servers/apache-tomcat-10.1.49/webapps/LoginWebApp* || true """
+				sh " rm -rf /mnt/servers/apache-tomcat-10.1.49/webapps/LoginWebApp* || true "
 			}
 		}
 
@@ -50,5 +49,10 @@ pipeline {
         }
 
     }
+	post {
+		always {
+			sh " rm -rf ${WORKSPACE}/*"
+		}
+	}
 
 }
