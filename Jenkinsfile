@@ -39,7 +39,7 @@ pipeline {
                 dir ('/mnt/test/') {
                     sh """
                     sed -i 's|localhost|database-1.cl2ge2kg8jsb.ap-south-1.rds.amazonaws.com|g' userRegistration.jsp
-		    sed -i 's|"root", "root"|"admin", "ratan1234"|g' userRegistration.jsp
+		    sed -i 's|"root", "root"|"admin", "ratan123"|g' userRegistration.jsp
                 
                     zip -r LoginWebApp.war *
                     cp LoginWebApp.war /mnt/servers/apache-tomcat-10.1.49/webapps/
