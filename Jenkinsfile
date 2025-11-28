@@ -39,8 +39,8 @@ pipeline {
             steps {
                 sh """
                     cd /mnt/project/
-                    docker compose down || true
-                    docker compose up -d
+                    docker-compose down || true
+                    docker-compose up -d
                 """
             }
         }
